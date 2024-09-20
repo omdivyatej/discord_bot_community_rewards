@@ -1,0 +1,19 @@
+<!-- flask_app/templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Connect Your Wallet</title>
+</head>
+<body>
+    <h1>Connect Your MetaMask Wallet</h1>
+    <p id="status"></p>
+    <button id="connectButton">Connect Wallet</button>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script>
+        window.discordUserId = "{{ discord_user_id }}";
+    </script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
