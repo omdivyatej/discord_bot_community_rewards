@@ -1,0 +1,29 @@
+<!-- flask_app/templates/add_network.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Network to MetaMask</title>
+</head>
+<body>
+    <h1>Add Network to MetaMask</h1>
+    <p id="status"></p>
+    <button id="addNetworkButton">Add Network</button>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script>
+        const networkParams = {
+            chainId: "{{ chain_id }}",
+            chainName: "{{ network_name }}",
+            rpcUrls: ["{{ rpc_url }}"],
+            nativeCurrency: {
+                name: "{{ symbol }}",
+                symbol: "{{ symbol }}",
+                decimals: 18
+            },
+            blockExplorerUrls: ["{{ block_explorer_url }}"]
+        };
+    </script>
+    <script src="{{ url_for('static', filename='js/add_network.js') }}"></script>
+</body>
+</html>

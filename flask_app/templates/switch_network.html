@@ -1,0 +1,30 @@
+<!-- flask_app/templates/switch_network.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Switch Network and Register Wallet</title>
+</head>
+<body>
+    <h1>Switch Network and Register Wallet</h1>
+    <p id="status"></p>
+    <button id="switchNetworkButton">Switch Network</button>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script>
+        const discordUserId = "{{ discord_user_id }}";
+        const networkParams = {
+            chainId: "{{ chain_id }}",
+            chainName: "{{ network_name }}",
+            rpcUrls: ["{{ rpc_url }}"],
+            nativeCurrency: {
+                name: "{{ symbol }}",
+                symbol: "{{ symbol }}",
+                decimals: 18
+            },
+            blockExplorerUrls: ["{{ block_explorer_url }}"]
+        };
+    </script>
+    <script src="{{ url_for('static', filename='js/switch_network.js') }}"></script>
+</body>
+</html>
