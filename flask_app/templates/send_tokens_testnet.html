@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Send SepoliaETH</title>
+  </head>
+  <body>
+    <h1>Send {{ amount }} SepoliaETH to {{ wallet_address }}</h1>
+    <p id="status"></p>
+    <button id="sendEtherButton">Send {{ amount }} SepoliaETH</button>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script>
+      const walletAddress = "{{ wallet_address }}"; // Recipient address
+      const amount = {{ amount }}; // Amount of SepoliaETH to send
+      window.addEventListener("load", async function () {
+        if (typeof window.ethereum !== "undefined") {
+          console.log("MetaMask is installed!");
+        } else {
+          document.getElementById("status").innerText =
+            "MetaMask is not installed. Please install it to continue.";
+          return;
+        }
+
+        const sendEtherButton = document.getElementById("sendEtherButton");
+        sendEtherButton.addEventListener("click", async () => {
+          try {
+            const accounts = await ethereum.request({
+              method: "eth_requestAccounts",
+            });
+            const senderAddress = accounts[0];
+
+            console.log("Sender address: ", senderAddress);
+            if (senderAddress.toLowerCase() === walletAddress.toLowerCase()) {
+              document.getElementById("status").innerText =
+                "Error: Sending Ether to yourself is not allowed.";
+              return;
+            }
+
+            const web3 = new Web3(window.ethereum); // Use MetaMask's provider
+            console.log("Web3 instance: ", web3);
+
+            // Send {{ amount }} SepoliaETH
+            await web3.eth.sendTransaction({
+              from: senderAddress,
+              to: walletAddress,
+              value: web3.utils.toWei({{ amount }}, "ether"), // Convert {{ amount }} ETH to wei
+              gas: 21000, // Standard gas limit for ETH transfer
+            });
+
+            document.getElementById(
+              "status"
+            ).innerText = `Successfully sent ${amount} SepoliaETH to ${walletAddress}!`;
+          } catch (error) {
+            console.error("Error sending Ether:", error);
+            document.getElementById("status").innerText = error.message;
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
