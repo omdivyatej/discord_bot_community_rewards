@@ -84,14 +84,23 @@ def switch_network():
     if not discord_user_id:
         return "Discord user ID is required.", 400
 
+    chain_id = request.args.get('chainId')
+    network_name = request.args.get('networkName')
+    rpc_url = request.args.get('rpcUrl')
+    symbol = request.args.get('symbol')
+    block_explorer_url = request.args.get('blockExplorerUrl')
+    print(chain_id, network_name, rpc_url, symbol, block_explorer_url)
+
+    if not all([chain_id, network_name, rpc_url, symbol, block_explorer_url]):
+        return "Missing network parameters.", 400
     # For this example, we'll hardcode the admin's network parameters.
     # In a real application, you would retrieve these from a database or configuration.
     admin_network = {
-        'chain_id': '0x64',
-        'network_name': 'Gnosis',
-        'rpc_url': 'https://rpc.gnosischain.com',
-        'symbol': 'xDAI',
-        'block_explorer_url': 'https://blockscout.com/xdai/mainnet'
+        'chain_id': chain_id,   
+        'network_name': network_name,
+        'rpc_url': rpc_url,
+        'symbol': symbol,
+        'block_explorer_url': block_explorer_url
     }
 
     return render_template('switch_network.html', discord_user_id=discord_user_id, **admin_network)
