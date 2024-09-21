@@ -1,4 +1,5 @@
 # flask_app/models.py
+from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
@@ -27,3 +28,20 @@ class AdminNetwork(db.Model):
 
     def __repr__(self):
         return f'<AdminNetwork {self.discord_user_id} - {self.chain_id}>'
+
+
+
+class PostUpvote(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    post_id = db.Column(db.String(100), nullable=False)  # Post/Message ID
+    reply_id = db.Column(db.String(100), nullable=True)  # Reply ID (Optional)
+    # ID of user who made the post or reply
+    user_id = db.Column(db.String(50), nullable=False)
+    upvotes = db.Column(db.Integer, default=0)
+    notification_sent = db.Column(db.Boolean, default=False)
+    last_updated = db.Column(db.DateTime, default=datetime.utcnow)
+    # Track if notification is sent
+    
+
+    def __repr__(self):
+        return f'<PostUpvote Post {self.post_id} - User {self.user_id} - Upvotes {self.upvotes}>'
