@@ -24,14 +24,12 @@ TOKEN_CONTRACT_ADDRESS = '0x07865c6e87b9f70255377e024ace6630c1eaa37f'
 w3 = Web3(Web3.HTTPProvider(
     f'https://mainnet.infura.io/v3/{INFURA_PROJECT_ID}'))
 
-
 @app.route('/')
 def index():
     discord_user_id = request.args.get('discord_user_id')
     if not discord_user_id:
         return "Discord user ID is required.", 400
     return render_template('index.html', discord_user_id=discord_user_id)
-
 
 @app.route('/register_wallet', methods=['POST'])
 def register_wallet():
@@ -67,7 +65,6 @@ def register_wallet():
         print(f"An error occurred: {e}")
         return jsonify({'status': 'error', 'message': 'An internal error occurred.'}), 500
 
-
 @app.route('/add_network')
 def add_network():
     # Extract network parameters from query parameters
@@ -82,7 +79,6 @@ def add_network():
 
     return render_template('add_network.html', chain_id=chain_id, network_name=network_name,
                            rpc_url=rpc_url, symbol=symbol, block_explorer_url=block_explorer_url)
-
 
 @app.route('/switch_network')
 def switch_network():
