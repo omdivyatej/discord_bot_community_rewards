@@ -13,8 +13,8 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 
 
 # Replace with your Flask app's URL
-#FLASK_APP_URL = 'http://localhost:5000'
-FLASK_APP_URL = 'https://acf4-223-255-254-102.ngrok-free.app'
+FLASK_APP_URL = 'http://localhost:5000'
+#FLASK_APP_URL = 'https://acf4-223-255-254-102.ngrok-free.app'
 
 @bot.event
 async def on_ready():

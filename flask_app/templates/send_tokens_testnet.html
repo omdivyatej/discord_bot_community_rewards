@@ -3,11 +3,72 @@
   <head>
     <meta charset="UTF-8" />
     <title>Send SepoliaETH</title>
+    <!-- Include Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background: linear-gradient(to right, #ffd580, #add8e6);
+        font-family: 'Poppins', sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+
+      .container {
+        background: rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+        border-radius: 20px;
+        padding: 40px;
+        text-align: center;
+      }
+
+      h1 {
+        color: #333;
+        margin-bottom: 30px;
+      }
+
+      #status {
+        margin: 20px 0;
+        font-size: 16px;
+        color: #666;
+      }
+
+      #sendEtherButton {
+        background: #007bff;
+        border: none;
+        padding: 15px 30px;
+        font-size: 18px;
+        color: #fff;
+        border-radius: 30px;
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.75);
+        cursor: pointer;
+        outline: none;
+        transition: all 0.3s ease;
+      }
+
+      #sendEtherButton:hover {
+        background: #0056b3;
+        box-shadow: 0 6px 20px rgba(0, 86, 179, 0.85);
+      }
+
+      #sendEtherButton:active {
+        transform: translateY(2px);
+        box-shadow: 0 3px 10px rgba(0, 123, 255, 0.75);
+      }
+    </style>
   </head>
   <body>
-    <h1>Send {{ amount }} SepoliaETH to {{ wallet_address }}</h1>
-    <p id="status"></p>
-    <button id="sendEtherButton">Send {{ amount }} SepoliaETH</button>
+    <div class="container">
+      <h1>Send {{ amount }} SepoliaETH to {{ wallet_address }}</h1>
+      <p id="status"></p>
+      <button id="sendEtherButton">Send {{ amount }} SepoliaETH</button>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
     <script>

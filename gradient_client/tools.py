@@ -48,4 +48,4 @@ async def create_knowledge_base(k_source):
 			chat_history=[],
 			api_name="/handle_upload"
 	)
-	print(result)
+	return result
