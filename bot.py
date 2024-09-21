@@ -31,7 +31,7 @@ FLASK_APP_URL = 'https://acf4-223-255-254-102.ngrok-free.app'
 # Tracking upvotes every 10 seconds
 
 
-admin_channel_id = 1287119882529542144
+admin_channel_id = 1287184435380490272
 
 
 # bot.py
@@ -40,95 +40,95 @@ admin_channel_id = 1287119882529542144
 logging.basicConfig(level=logging.INFO)
 
 
-# @tasks.loop(seconds=10000)  # Run every 10 seconds
-# async def track_upvotes():
-#     logging.info("Checking for upvote changes...")
+@tasks.loop(seconds=10)  # Run every 10 seconds
+async def track_upvotes():
+    logging.info("Checking for upvote changes...")
 
-#     for guild in bot.guilds:
-#         for channel in guild.text_channels:
-#             async for message in channel.history(limit=100):
-#                 if message.reactions:
-#                     for reaction in message.reactions:
-#                         if str(reaction.emoji) == "🟢":  # Green circle emoji for upvotes
-#                             upvote_count = reaction.count
+    for guild in bot.guilds:
+        for channel in guild.text_channels:
+            async for message in channel.history(limit=100):
+                if message.reactions:
+                    for reaction in message.reactions:
+                        if str(reaction.emoji) == "🟢":  # Green circle emoji for upvotes
+                            upvote_count = reaction.count
 
-#                             # Determine if it's a reply to a post
-#                             if message.reference:
-#                                 parent_message = await channel.fetch_message(message.reference.message_id)
-#                                 logging.info(
-#                                     f"Tracking upvote for reply: {message.content} to post: {parent_message.content}")
-#                                 data = {
-#                                     'post_id': parent_message.id,
-#                                     'reply_id': message.id,
-#                                     'user_id': message.author.id,
-#                                     'upvotes': upvote_count
-#                                 }
-#                             else:
-#                                 logging.info(
-#                                     f"Tracking upvote for post: {message.content}")
-#                                 data = {
-#                                     'post_id': message.id,
-#                                     'reply_id': None,
-#                                     'user_id': message.author.id,
-#                                     'upvotes': upvote_count
-#                                 }
+                            # Determine if it's a reply to a post
+                            if message.reference:
+                                parent_message = await channel.fetch_message(message.reference.message_id)
+                                logging.info(
+                                    f"Tracking upvote for reply: {message.content} to post: {parent_message.content}")
+                                data = {
+                                    'post_id': parent_message.id,
+                                    'reply_id': message.id,
+                                    'user_id': message.author.id,
+                                    'upvotes': upvote_count
+                                }
+                            else:
+                                logging.info(
+                                    f"Tracking upvote for post: {message.content}")
+                                data = {
+                                    'post_id': message.id,
+                                    'reply_id': None,
+                                    'user_id': message.author.id,
+                                    'upvotes': upvote_count
+                                }
 
-#                             # Capture and check upvote in Flask API
-#                             capture_response = requests.post(
-#                                 f'{FLASK_APP_URL}/api/capture_upvote', json=data)
+                            # Capture and check upvote in Flask API
+                            capture_response = requests.post(
+                                f'{FLASK_APP_URL}/api/capture_upvote', json=data)
 
-#                             if capture_response.status_code == 200:
-#                                 capture_data = capture_response.json()
-#                                 if capture_data.get('change_detected'):
-#                                     logging.info(
-#                                         f"Upvote change detected for user {message.author.name}")
+                            if capture_response.status_code == 200:
+                                capture_data = capture_response.json()
+                                if capture_data.get('change_detected'):
+                                    logging.info(
+                                        f"Upvote change detected for user {message.author.name}")
 
-#                                     # Generate token transfer link if a change is detected
-#                                     generate_link_response = requests.post(f'{FLASK_APP_URL}/api/generate_token_link', json={
-#                                         'recipient_id': message.author.id,
-#                                         'upvotes': capture_data.get('new_upvotes')
-#                                     })
+                                    # Generate token transfer link if a change is detected
+                                    generate_link_response = requests.post(f'{FLASK_APP_URL}/api/generate_token_link', json={
+                                        'recipient_id': message.author.id,
+                                        'upvotes': capture_data.get('new_upvotes')
+                                    })
 
-#                                     if generate_link_response.status_code == 200:
-#                                         link_data = generate_link_response.json()
-#                                         token_link = link_data.get('link')
+                                    if generate_link_response.status_code == 200:
+                                        link_data = generate_link_response.json()
+                                        token_link = link_data.get('link')
 
-#                                         # Send message to admin channel
-#                                         admin_channel = bot.get_channel(
-#                                             admin_channel_id)
-#                                         if message.reference:
-#                                             await admin_channel.send(
-#                                                 f"User {message.author.name} received {upvote_count} upvotes for reply: {message.content} to post: {parent_message.content}.\n[Send tokens]({token_link})"
-#                                             )
-#                                         else:
-#                                             await admin_channel.send(
-#                                                 f"User {message.author.name} received {upvote_count} upvotes for post: {message.content}.\n[Send tokens]({token_link})"
-#                                             )
+                                        # Send message to admin channel
+                                        admin_channel = bot.get_channel(
+                                            admin_channel_id)
+                                        # if message.reference:
+                                        #     await admin_channel.send(
+                                        #         f"User {message.author.name} received {upvote_count} upvotes for reply: {message.content} to post: {parent_message.content}.\n[Send tokens]({token_link})"
+                                        #     )
+                                        # else:
+                                        #     await admin_channel.send(
+                                        #         f"User {message.author.name} received {upvote_count} upvotes for post: {message.content}.\n[Send tokens]({token_link})"
+                                        #     )
 
-#                                         # Mark notification as sent in the DB
-#                                         update_notification_response = requests.post(f'{FLASK_APP_URL}/api/update_notification', json={
-#                                             'post_id': data['post_id'],
-#                                             'reply_id': data['reply_id'],
-#                                             'notification_sent': True
-#                                         })
+                                        # Mark notification as sent in the DB
+                                        update_notification_response = requests.post(f'{FLASK_APP_URL}/api/update_notification', json={
+                                            'post_id': data['post_id'],
+                                            'reply_id': data['reply_id'],
+                                            'notification_sent': True
+                                        })
 
-#                                         if update_notification_response.status_code != 200:
-#                                             logging.error(
-#                                                 f"Failed to update notification status in DB")
+                                        if update_notification_response.status_code != 200:
+                                            logging.error(
+                                                f"Failed to update notification status in DB")
 
-#                                     else:
-#                                         logging.error(
-#                                             f"Error generating token link: {generate_link_response.json().get('message')}")
-#                             else:
-#                                 logging.error(
-#                                     f"Error capturing upvote: {capture_response.json().get('message')}")
+                                    else:
+                                        logging.error(
+                                            f"Error generating token link: {generate_link_response.json().get('message')}")
+                            else:
+                                logging.error(
+                                    f"Error capturing upvote: {capture_response.json().get('message')}")
 
-#     await asyncio.sleep(10)  # Wait for 10 seconds before checking again
+    await asyncio.sleep(10)  # Wait for 10 seconds before checking again
 
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user}')
-    #track_upvotes.start()
+    track_upvotes.start()
 
 @bot.command(name='admin_connect')
 async def admin_connect(ctx, *, params):
@@ -147,12 +147,11 @@ async def admin_connect(ctx, *, params):
         return
 
     # Build the query parameters
-    query_params = f"?chainId={chain_id_str}&networkName={network_name}&rpcUrl={rpc_url}&symbol={symbol}&blockExplorerUrl={block_explorer_url}"
-
+    discord_user_id = str(ctx.author.id)
+    link = f"{FLASK_APP_URL}/add_and_save_network?discord_user_id={discord_user_id}&chainId={chain_id}&networkName={network_name}&rpcUrl={rpc_url}&symbol={symbol}&blockExplorerUrl={block_explorer_url}&tokenContractAddress={token_contract_address}"
     # Send link to the admin
-    link = f"{FLASK_APP_URL}/add_network{query_params}"
-    await ctx.author.send(f"Click this link to add the network to MetaMask: {link}")
-    await ctx.send("I've sent you a direct message with instructions to add the network.")
+    await ctx.author.send(f"Click this link to add the network to MetaMask and then save it: {link}")
+    await ctx.send("I've sent you a direct message with the link to add and save the network.")
 
 @bot.command(name='register_user_wallet')
 async def register_user_wallet(ctx):
