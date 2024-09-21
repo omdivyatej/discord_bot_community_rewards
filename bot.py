@@ -2,12 +2,15 @@
 import asyncio
 import discord
 from discord.ext import commands
-import os
 
+import os
+from gradient_client.tools import create_knowledge_base
+from openai_chat.chat import get_answers_from_knowledge_base
 intents = discord.Intents.default()
 intents.message_content = True  # Required to read message content
 
 bot = commands.Bot(command_prefix='!', intents=intents)
+
 
 # Replace with your Flask app's URL
 FLASK_APP_URL = 'http://localhost:5000'
@@ -57,7 +60,7 @@ async def register_user_wallet(ctx):
     await ctx.author.send(f"Please connect your wallet and switch to the admin's network using this link: {link}")
     await ctx.send("I've sent you a direct message with instructions to switch networks and register your wallet.")
 
-@bot.command(name='upload_text')
+@bot.command(name='create_knowledge_base')
 async def upload_text(ctx):
     await ctx.send("Please upload your `.txt` file or type your text within the next 60 seconds.")
 
@@ -75,13 +78,52 @@ async def upload_text(ctx):
         if attachment.filename.endswith('.txt'):
             file_content = await attachment.read()
             text = file_content.decode('utf-8')
-            await ctx.send(f"📄 **Text from file:**\n{text}")
+
+            print(f"Received text from file: {text}")
+            await create_knowledge_base(text)
+            await ctx.send(f"📄 **Knowledge Base Created!**")
         else:
             await ctx.send('❌ Please upload a file with a `.txt` extension.')
     elif message.content:
         text = message.content
+        create_knowledge_base(text)
         await ctx.send(f"📝 **Received text:**\n{text}")
     else:
         await ctx.send('⚠️ No text or file received. Please try again.')
-        
-bot.run('MTI4NjQxNTk2MTAwMzY1NTI2Mg.G81Yyb.2i7rSnwXrOcKKtY0QSZVNPcTk103XIqhRXknsk')
+
+@bot.command(name='ask')
+async def ask_question(ctx, *, question):
+
+    await ctx.send("🔍 Processing your question...")
+
+    try:
+        answer = get_answers_from_knowledge_base(question)
+        print(answer)
+        await ctx.send(f"💡 **Answer:**\n{answer}")
+    except Exception as e:
+        print(f"Error: {e}")
+        await ctx.send("❌ Sorry, I couldn't process your question.")
+
+@bot.command(name='predict_reply')
+async def predict_reply(ctx):
+    # Fetch last 10 messages from the current channel
+    messages = [message async for message in ctx.channel.history(limit=10)]
+
+    # Reverse the order to make it chronological
+    messages.reverse()
+
+    # Format messages
+    formatted_messages = "\n".join([f"{message.author.name}: {message.content}" for message in messages])
+
+    await ctx.author.send("🔍 Processing the last 10 messages to predict the next best reply...")
+
+    try:
+        # Send messages to the LLM to predict the next reply
+        predicted_reply = get_answers_from_knowledge_base(formatted_messages)
+        await ctx.author.send(f"🤖 **Predicted Reply:**\n{predicted_reply}")
+    except Exception as e:
+        print(f"Error: {e}")
+        await ctx.author.send("❌ Sorry, I couldn't predict the next reply.")
+
+
+bot.run('MTI4NjgwOTkyMzIwODA4NTU0OA.GN7EAL.wGXZ2P_ZuCTST5Y13fAnbWItBgAdrBQG_rVV3g')
