@@ -10,12 +10,13 @@ import discord
 from discord.ext import commands, tasks
 import asyncio
 import requests
-
+from gradient_client.tools import create_knowledge_base
+from openai_chat.chat import get_answers_from_knowledge_base
 from flask_app.models import PostUpvote
 
 
-DISCORD_BOT_TOKEN = 'MTI4NjQxNTk2MTAwMzY1NTI2Mg.G81Yyb.2i7rSnwXrOcKKtY0QSZVNPcTk103XIqhRXknsk'from gradient_client.tools import create_knowledge_base
-from openai_chat.chat import get_answers_from_knowledge_base
+DISCORD_BOT_TOKEN = 'MTI4NjQxNTk2MTAwMzY1NTI2Mg.G81Yyb.2i7rSnwXrOcKKtY0QSZVNPcTk103XIqhRXknsk'
+
 intents = discord.Intents.default()
 intents.message_content = True  # Required to read message content
 intents.reactions = True  # Enable reaction tracking
