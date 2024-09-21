@@ -1,4 +1,5 @@
 # bot.py
+import asyncio
 import discord
 from discord.ext import commands
 import os
@@ -56,4 +57,31 @@ async def register_user_wallet(ctx):
     await ctx.author.send(f"Please connect your wallet and switch to the admin's network using this link: {link}")
     await ctx.send("I've sent you a direct message with instructions to switch networks and register your wallet.")
 
+@bot.command(name='upload_text')
+async def upload_text(ctx):
+    await ctx.send("Please upload your `.txt` file or type your text within the next 60 seconds.")
+
+    def check(m):
+        return m.author == ctx.author and (m.content or m.attachments)
+
+    try:
+        message = await bot.wait_for('message', timeout=60.0, check=check)
+    except asyncio.TimeoutError:
+        await ctx.send('⏰ You took too long to respond. Please try again.')
+        return
+
+    if message.attachments:
+        attachment = message.attachments[0]
+        if attachment.filename.endswith('.txt'):
+            file_content = await attachment.read()
+            text = file_content.decode('utf-8')
+            await ctx.send(f"📄 **Text from file:**\n{text}")
+        else:
+            await ctx.send('❌ Please upload a file with a `.txt` extension.')
+    elif message.content:
+        text = message.content
+        await ctx.send(f"📝 **Received text:**\n{text}")
+    else:
+        await ctx.send('⚠️ No text or file received. Please try again.')
+        
 bot.run('MTI4NjQxNTk2MTAwMzY1NTI2Mg.G81Yyb.2i7rSnwXrOcKKtY0QSZVNPcTk103XIqhRXknsk')
