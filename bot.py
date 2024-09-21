@@ -11,11 +11,9 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 # Replace with your Flask app's URL
 FLASK_APP_URL = 'http://localhost:5000'
 
-
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user}')
-
 
 @bot.command(name='register_wallet')
 async def register_wallet(ctx):
@@ -23,7 +21,6 @@ async def register_wallet(ctx):
     link = f"{FLASK_APP_URL}/?discord_user_id={discord_user_id}"
     await ctx.author.send(f"Please connect your wallet using this link: {link}")
     await ctx.send("I've sent you a direct message with instructions to connect your wallet.")
-
 
 @bot.command(name='admin_connect')
 async def admin_connect(ctx, *, params):
@@ -52,13 +49,11 @@ async def admin_connect(ctx, *, params):
     await ctx.author.send(f"Click this link to add the network to MetaMask: {link}")
     await ctx.send("I've sent you a direct message with instructions to add the network.")
 
-
 @bot.command(name='register_user_wallet')
 async def register_user_wallet(ctx):
     discord_user_id = str(ctx.author.id)
     link = f"{FLASK_APP_URL}/switch_network?discord_user_id={discord_user_id}"
     await ctx.author.send(f"Please connect your wallet and switch to the admin's network using this link: {link}")
     await ctx.send("I've sent you a direct message with instructions to switch networks and register your wallet.")
-
 
 bot.run('MTI4NjQxNTk2MTAwMzY1NTI2Mg.G81Yyb.2i7rSnwXrOcKKtY0QSZVNPcTk103XIqhRXknsk')
