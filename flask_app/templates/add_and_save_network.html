@@ -1,0 +1,61 @@
+<!-- flask_app/templates/add_and_save_network.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add and Save Network</title>
+</head>
+<body>
+    <h1>Add Network to MetaMask</h1>
+    <p id="status"></p>
+    <button id="addNetworkButton">Add Network to MetaMask</button>
+    <button id="saveNetworkButton" style="display:none;">Save Network Configuration</button>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script>
+        const networkParams = {
+            chainId: "{{ chain_id }}",
+            chainName: "{{ network_name }}",
+            rpcUrls: ["{{ rpc_url }}"],
+            nativeCurrency: {
+                name: "{{ symbol }}",
+                symbol: "{{ symbol }}",
+                decimals: 18
+            },
+            blockExplorerUrls: ["{{ block_explorer_url }}"]
+        };
+        const discordUserId = "{{ discord_user_id }}";
+        const saveLink = `/save_network?discord_user_id=${discordUserId}&chainId=${networkParams.chainId}&networkName=${networkParams.chainName}&rpcUrl=${networkParams.rpcUrls[0]}&symbol=${networkParams.nativeCurrency.symbol}&blockExplorerUrl=${networkParams.blockExplorerUrls[0]}&tokenContractAddress={{ token_contract_address }}`;
+
+        window.addEventListener('load', function() {
+            if (typeof window.ethereum !== 'undefined') {
+                console.log('MetaMask is installed!');
+            } else {
+                document.getElementById('status').innerText = 'MetaMask is not installed. Please install it to continue.';
+                return;
+            }
+
+            const addNetworkButton = document.getElementById('addNetworkButton');
+            const saveNetworkButton = document.getElementById('saveNetworkButton');
+
+            addNetworkButton.addEventListener('click', async () => {
+                try {
+                    await ethereum.request({
+                        method: 'wallet_addEthereumChain',
+                        params: [networkParams]
+                    });
+                    document.getElementById('status').innerText = 'Network added successfully! Now you can save the configuration.';
+                    saveNetworkButton.style.display = 'block';  // Show the save button
+                } catch (error) {
+                    console.error('Error adding network:', error);
+                    document.getElementById('status').innerText = error.message;
+                }
+            });
+
+            saveNetworkButton.addEventListener('click', () => {
+                window.location.href = saveLink;
+            });
+        });
+    </script>
+</body>
+</html>

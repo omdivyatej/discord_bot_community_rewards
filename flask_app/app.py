@@ -1,9 +1,7 @@
 # flask_app/app.py
+from models import db, UserWallet, AdminNetwork
 from flask import Flask, render_template, request, jsonify
-from flask_sqlalchemy import SQLAlchemy
-from models import db, UserWallet
 from web3 import Web3
-import os
 
 app = Flask(__name__)
 # Replace with a secure secret key
@@ -14,9 +12,10 @@ db.init_app(app)
 
 # Initialize Web3
 # Replace with your Infura Project ID
-INFURA_PROJECT_ID = 'YOUR_INFURA_PROJECT_ID'
+INFURA_PROJECT_ID = '9595c12e1d784a39879aa3faa5dabd0e'
+TOKEN_CONTRACT_ADDRESS = '0x07865c6e87b9f70255377e024ace6630c1eaa37f'
 w3 = Web3(Web3.HTTPProvider(
-    f'https://mainnet.infura.io/v3/9595c12e1d784a39879aa3faa5dabd0e'))
+    f'https://mainnet.infura.io/v3/{INFURA_PROJECT_ID}'))
 
 @app.route('/')
 def index():
@@ -80,17 +79,129 @@ def switch_network():
     if not discord_user_id:
         return "Discord user ID is required.", 400
 
-    # For this example, we'll hardcode the admin's network parameters.
-    # In a real application, you would retrieve these from a database or configuration.
-    admin_network = {
-        'chain_id': '0x64',
-        'network_name': 'Gnosis',
-        'rpc_url': 'https://rpc.gnosischain.com',
-        'symbol': 'xDAI',
-        'block_explorer_url': 'https://blockscout.com/xdai/mainnet'
-    }
+    # Retrieve the admin's network configuration from the database
+    # Assuming there's only one admin network config
+    admin_network = AdminNetwork.query.first()
 
-    return render_template('switch_network.html', discord_user_id=discord_user_id, **admin_network)
+    if not admin_network:
+        return "Admin network configuration not found.", 404
+
+    return render_template('switch_network.html',
+                           discord_user_id=discord_user_id,
+                           chain_id=admin_network.chain_id,
+                           network_name=admin_network.network_name,
+                           rpc_url=admin_network.rpc_url,
+                           symbol=admin_network.symbol,
+                           block_explorer_url=admin_network.block_explorer_url)
+
+
+@app.route('/save_network')
+def save_network():
+    discord_user_id = request.args.get('discord_user_id')
+    chain_id = request.args.get('chainId')
+    network_name = request.args.get('networkName')
+    rpc_url = request.args.get('rpcUrl')
+    symbol = request.args.get('symbol')
+    block_explorer_url = request.args.get('blockExplorerUrl')
+    token_contract_address = request.args.get('tokenContractAddress')
+
+    # Validate required parameters
+    if not all([discord_user_id, chain_id, network_name, rpc_url, symbol, block_explorer_url, token_contract_address]):
+        return "Missing network parameters.", 400
+
+    # Check if network configuration for this admin already exists
+    existing_network = AdminNetwork.query.filter_by(
+        discord_user_id=discord_user_id).first()
+    if existing_network:
+        # Update the existing network configuration
+        existing_network.chain_id = chain_id
+        existing_network.network_name = network_name
+        existing_network.rpc_url = rpc_url
+        existing_network.symbol = symbol
+        existing_network.block_explorer_url = block_explorer_url
+        existing_network.token_contract_address = token_contract_address
+    else:
+        # Create a new network configuration
+        new_network = AdminNetwork(
+            discord_user_id=discord_user_id,
+            chain_id=chain_id,
+            network_name=network_name,
+            rpc_url=rpc_url,
+            symbol=symbol,
+            block_explorer_url=block_explorer_url,
+            token_contract_address=token_contract_address
+        )
+        db.session.add(new_network)
+
+    db.session.commit()
+
+    return "Network configuration saved successfully."
+
+@app.route('/send_tokens_testnet')
+def send_tokens_testnet():
+    recipient_id = request.args.get('recipient_id')
+    amount = request.args.get('amount')
+    admin_id = request.args.get('admin_id')
+
+    # Fetch the recipient's wallet address from the database
+    recipient = UserWallet.query.filter_by(
+        discord_user_id=recipient_id).first()
+    if not recipient:
+        return "Recipient not found.", 404
+
+    wallet_address = recipient.wallet_address
+
+    # Simulate sending testnet tokens (use Goerli Testnet for this example)
+    # Use Goerli Testnet RPC URL
+    testnet_rpc_url = f'https://sepolia.infura.io/v3/{INFURA_PROJECT_ID}'
+    # Replace with your testnet ERC-20 token contract
+    token_contract_address = TOKEN_CONTRACT_ADDRESS
+
+    return render_template('send_tokens_testnet.html', wallet_address=wallet_address, amount=amount, token_contract_address=token_contract_address, rpc_url=testnet_rpc_url)
+
+@app.route('/add_and_save_network')
+def add_and_save_network():
+    discord_user_id = request.args.get('discord_user_id')
+    chain_id = request.args.get('chainId')
+    network_name = request.args.get('networkName')
+    rpc_url = request.args.get('rpcUrl')
+    symbol = request.args.get('symbol')
+    block_explorer_url = request.args.get('blockExplorerUrl')
+    token_contract_address = request.args.get('tokenContractAddress')
+
+    if not all([discord_user_id, chain_id, network_name, rpc_url, symbol, block_explorer_url, token_contract_address]):
+        return "Missing network parameters.", 400
+
+    # Render a page where the admin will add the network first and then confirm to save it
+    return render_template('add_and_save_network.html',
+                           discord_user_id=discord_user_id,
+                           chain_id=chain_id,
+                           network_name=network_name,
+                           rpc_url=rpc_url,
+                           symbol=symbol,
+                           block_explorer_url=block_explorer_url,
+                           token_contract_address=token_contract_address)
+
+# API endpoint to fetch a user's wallet by their Discord ID
+
+
+@app.route('/api/get_wallet/<discord_user_id>', methods=['GET'])
+def get_wallet(discord_user_id):
+    try:
+        user_wallet = UserWallet.query.filter_by(
+            discord_user_id=discord_user_id).first()
+        if user_wallet:
+            return jsonify({
+                'status': 'success',
+                'wallet_address': user_wallet.wallet_address
+            })
+        else:
+            return jsonify({
+                'status': 'error',
+                'message': 'Wallet not found'
+            }), 404
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 
 if __name__ == '__main__':

@@ -3,16 +3,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Switch Network and Register Wallet</title>
+    <title>Switch Network</title>
 </head>
 <body>
-    <h1>Switch Network and Register Wallet</h1>
+    <h1>Switch to Admin's Network</h1>
     <p id="status"></p>
-    <button id="switchNetworkButton">Switch Network</button>
+    <button id="switchNetworkButton">Switch to Admin's Network</button>
 
     <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
     <script>
-        const discordUserId = "{{ discord_user_id }}";
         const networkParams = {
             chainId: "{{ chain_id }}",
             chainName: "{{ network_name }}",
@@ -24,7 +23,45 @@
             },
             blockExplorerUrls: ["{{ block_explorer_url }}"]
         };
+
+        window.addEventListener('load', async function() {
+            if (typeof window.ethereum !== 'undefined') {
+                console.log('MetaMask is installed!');
+            } else {
+                document.getElementById('status').innerText = 'MetaMask is not installed. Please install it to continue.';
+                return;
+            }
+
+            const switchNetworkButton = document.getElementById('switchNetworkButton');
+
+            switchNetworkButton.addEventListener('click', async () => {
+                try {
+                    // Try switching to the admin's network
+                    await ethereum.request({
+                        method: 'wallet_switchEthereumChain',
+                        params: [{ chainId: networkParams.chainId }]
+                    });
+                    document.getElementById('status').innerText = 'Network switched successfully!';
+                } catch (switchError) {
+                    // If the network is not added yet, add it
+                    if (switchError.code === 4902) {
+                        try {
+                            await ethereum.request({
+                                method: 'wallet_addEthereumChain',
+                                params: [networkParams]
+                            });
+                            document.getElementById('status').innerText = 'Network added and switched successfully!';
+                        } catch (addError) {
+                            console.error('Error adding network:', addError);
+                            document.getElementById('status').innerText = 'Failed to add network.';
+                        }
+                    } else {
+                        console.error('Error switching network:', switchError);
+                        document.getElementById('status').innerText = 'Failed to switch network.';
+                    }
+                }
+            });
+        });
     </script>
-    <script src="{{ url_for('static', filename='js/switch_network.js') }}"></script>
 </body>
 </html>
