@@ -4,7 +4,7 @@ import logging
 import asyncio
 import discord
 from discord.ext import commands
-
+from gaianet.main import update_knowledge_base
 import requests
 import discord
 from discord.ext import commands, tasks
@@ -42,7 +42,7 @@ logging.basicConfig(level=logging.INFO)
 
 @tasks.loop(seconds=10)  # Run every 10 seconds
 async def track_upvotes():
-    logging.info("Checking for upvote changes...")
+    #logging.info("Checking for upvote changes...")
 
     for guild in bot.guilds:
         for channel in guild.text_channels:
@@ -55,8 +55,8 @@ async def track_upvotes():
                             # Determine if it's a reply to a post
                             if message.reference:
                                 parent_message = await channel.fetch_message(message.reference.message_id)
-                                logging.info(
-                                    f"Tracking upvote for reply: {message.content} to post: {parent_message.content}")
+                                #logging.info(
+                                #    f"Tracking upvote for reply: {message.content} to post: {parent_message.content}")
                                 data = {
                                     'post_id': parent_message.id,
                                     'reply_id': message.id,
@@ -64,8 +64,8 @@ async def track_upvotes():
                                     'upvotes': upvote_count
                                 }
                             else:
-                                logging.info(
-                                    f"Tracking upvote for post: {message.content}")
+                                #logging.info(
+                                 #   f"Tracking upvote for post: {message.content}")
                                 data = {
                                     'post_id': message.id,
                                     'reply_id': None,
@@ -247,8 +247,10 @@ async def upload_text(ctx):
             text = file_content.decode('utf-8')
 
             print(f"Received text from file: {text}")
-            await create_knowledge_base(text)
+            output = await create_knowledge_base(text)
             await ctx.send(f"📄 **Knowledge Base Created!**")
+            await ctx.send(f"📄 **Updating Knowledge Base!**")
+            update_knowledge_base(output)
         else:
             await ctx.send('❌ Please upload a file with a `.txt` extension.')
     elif message.content:

@@ -35,14 +35,14 @@ async def create_knowledge_base(k_source):
 		text = k_source
     
 	# Step 4: Save to a file
-	with open('output.txt', 'w', encoding='utf-8') as f:
+	with open('D:\KayaPay\Work\Code\Discord Bot\gradient_client\output.txt', 'w', encoding='utf-8') as f:
 		f.write(text)
 
 	from gradio_client import Client, file
 
 	client = Client("https://tools.gaianet.xyz/")
 	result = await client.predict(
-			uploaded_file=file('output.txt'),
+            uploaded_file=file('D:\KayaPay\Work\Code\Discord Bot\gradient_client\output.txt'),
 			db_name="mazed-ai",
 			em_model="nomic-embed-text-v1.5.f16",
 			chat_history=[],
